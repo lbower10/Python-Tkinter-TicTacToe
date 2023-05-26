@@ -5,6 +5,7 @@
 # Logan Bowers
 # -------------------------------------
 
+import random
 from tkinter import *
 from tkinter import messagebox
 global clicked
@@ -36,7 +37,7 @@ def disableButtons():
     for b in buttons: b.config(state=DISABLED)
 
 # loops through list of all win conditions and checks if any of them are met
-def checkForWin(b, let, ):
+def checkForWin(b, let):
     global winner
     win_conditions = [
         [0, 1, 2],  # top row
@@ -71,11 +72,12 @@ def Clicked(b,buttons):
         clicked = False
         count += 1
         determineOutcome(buttons, "X")
-    elif b["text"] == " " and clicked == False:
-        b["text"] = "O"
-        clicked = True
-        count += 1
-        determineOutcome(buttons, "O")
+        if count < 9 and not winner:  # AI's turn if the game is not over
+            ai_move = random.choice([button for button in buttons if button["text"] == " "])
+            ai_move["text"] = "O"
+            clicked = True
+            count += 1
+            determineOutcome(buttons, "O")
     else:
         messagebox.showerror("Tic-Tac-Toe", "Box already filled\n")
 
