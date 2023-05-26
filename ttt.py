@@ -10,11 +10,32 @@ from tkinter import *
 from tkinter import messagebox
 global clicked
 global count
+global win_conditions
+global buttons
+buttons = []
 clicked, count = True, 0
+win_conditions = [
+    [0, 1, 2],  # top row
+    [3, 4, 5],  # middle row
+    [6, 7, 8],  # bottom row
+    [0, 3, 6],  # left column
+    [1, 4, 7],  # middle column
+    [2, 5, 8],  # right column
+    [0, 4, 8],  # diagonal
+    [2, 4, 6]   # diagonal
+]
 
 def end_game(): game.quit() # End the game from the options menu
 
+# ------------------------------------------------------------
+# disables all buttons in the grid when outcome is determined
+# ------------------------------------------------------------
+def disableButtons():
+    for b in buttons: b.config(state=DISABLED)
+
+# ----------------------------------------
 # Resets and reconfigures the button grid
+# ----------------------------------------
 def reConfig():
     buttons.clear()
     global clicked
@@ -26,29 +47,32 @@ def reConfig():
         b.grid(row=i//3, column=i%3, sticky=NSEW, padx=3, pady=3)
         b.configure(bg="light gray")
 
+
+# ---------------------------------
+# determine if AI has won the game
+# ---------------------------------
+def doesAI_Win(b, let):
+    for condition in win_conditions:
+        if b[condition[0]]["text"] == b[condition[1]]["text"] == b[condition[2]]["text"] == let:
+            return True
+
+    return False
+
+
+# -----------------------------------------------------------------------------
 # Calls helper function to check the grid and determine a winner, or no winner
+# -----------------------------------------------------------------------------
 def determineOutcome(b, let):
     global winner
     winner = False
     checkForWin(b, let)
 
-# disables all buttons in the grid when outcome is determined
-def disableButtons():
-    for b in buttons: b.config(state=DISABLED)
 
+# ---------------------------------------------------------------------------
 # loops through list of all win conditions and checks if any of them are met
+# ---------------------------------------------------------------------------
 def checkForWin(b, let):
     global winner
-    win_conditions = [
-        [0, 1, 2],  # top row
-        [3, 4, 5],  # middle row
-        [6, 7, 8],  # bottom row
-        [0, 3, 6],  # left column
-        [1, 4, 7],  # middle column
-        [2, 5, 8],  # right column
-        [0, 4, 8],  # diagonal
-        [2, 4, 6]   # diagonal
-    ]
 
     for condition in win_conditions:
         if b[condition[0]]["text"] == b[condition[1]]["text"] == b[condition[2]]["text"] == let:
@@ -58,13 +82,15 @@ def checkForWin(b, let):
             messagebox.showinfo("Tic-Tac-Toe:", let + " wins")
             disableButtons()
             return
-    #  tie?
-    if count == 9 and winner == False:
+    if count == 9 and winner == False: #  tie?
         messagebox.showinfo("Tic-Tac-Toe:", "No one wins")
         disableButtons()
 
+
+# -------------------------------------------------
 # Defines what to do when a button is clicked
 # Continuously checks if it can determine a winner
+# -------------------------------------------------
 def Clicked(b,buttons):
     global clicked, count
     if b["text"] == " " and clicked == True:
@@ -73,7 +99,35 @@ def Clicked(b,buttons):
         count += 1
         determineOutcome(buttons, "X")
         if count < 9 and not winner:  # AI's turn if the game is not over
-            ai_move = random.choice([button for button in buttons if button["text"] == " "])
+            ai_move = None
+
+            # Check for winning move for AI
+            for button in buttons:
+                if button["text"] == " ":
+                    button["text"] = "O"
+                    if doesAI_Win(buttons, "O"):
+                        ai_move = button
+                        break
+                    else:
+                        button["text"] = " "
+
+            # Logic for "ai" opponent's turn
+            if ai_move is None:
+                # Check for winning move for the player and block it
+                for button in buttons:
+                    if button["text"] == " ":
+                        button["text"] = "X"
+                        if doesAI_Win(buttons, "X"):
+                            ai_move = button
+                            break
+                        else:
+                            button["text"] = " "
+
+            if ai_move is None:
+                # Choose a random available move
+                ai_moves = [button for button in buttons if button["text"] == " "]
+                ai_move = random.choice(ai_moves)
+
             ai_move["text"] = "O"
             clicked = True
             count += 1
@@ -81,14 +135,16 @@ def Clicked(b,buttons):
     else:
         messagebox.showerror("Tic-Tac-Toe", "Box already filled\n")
 
+
+# ----------------------------------------------------------------------
+# I guess I could technically call this main?? not really
+# Initial stuff is happening here. Reconfig really kicks everything off
+# ----------------------------------------------------------------------
 game = Tk()
 game.title('Tic-Tac-Toe')
 game.geometry("400x400")
 game.resizable(True, True)
 game.configure(bg="black")
-
-global buttons
-buttons = []
 reConfig()
 
 for i in range(3):
@@ -102,5 +158,4 @@ options = Menu(menu, tearoff=False)
 menu.add_cascade(label="Options", menu=options)
 options.add_command(label="Reset Game", command=reConfig)
 options.add_command(label="Exit", command=end_game)
-
-game.mainloop()
+game.mainloop() # runs the game
