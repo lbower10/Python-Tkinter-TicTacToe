@@ -48,10 +48,12 @@ def reConfig():
         b.configure(bg="light gray")
 
 
-# ---------------------------------
-# determine if AI has won the game
-# ---------------------------------
-def doesAI_Win(b, let):
+# -------------------------------------------
+# determine if next move is a winning move
+# used for AI to make winning move, or block
+# the player's winning move
+# -------------------------------------------
+def isWinningMove(b, let):
     for condition in win_conditions:
         if b[condition[0]]["text"] == b[condition[1]]["text"] == b[condition[2]]["text"] == let:
             return True
@@ -105,7 +107,7 @@ def Clicked(b,buttons):
             for button in buttons:
                 if button["text"] == " ":
                     button["text"] = "O"
-                    if doesAI_Win(buttons, "O"):
+                    if isWinningMove(buttons, "O"):
                         ai_move = button
                         break
                     else:
@@ -117,7 +119,7 @@ def Clicked(b,buttons):
                 for button in buttons:
                     if button["text"] == " ":
                         button["text"] = "X"
-                        if doesAI_Win(buttons, "X"):
+                        if isWinningMove(buttons, "X"):
                             ai_move = button
                             break
                         else:
