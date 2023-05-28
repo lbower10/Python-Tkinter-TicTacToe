@@ -42,7 +42,7 @@ def reConfig():
     global count
     clicked, count = True, 0
     for i in range(9):
-        b = Button(game, text=" ", font=("Comfortaa", 40,),height=3, width=6, bg="SystemButtonFace", command=lambda i=i: Clicked(buttons[i], buttons))
+        b = Button(game, text=" ", font=("Comfortaa", 40,),height=3, width=6, bg="white", command=lambda i=i: Clicked(buttons[i], buttons))
         buttons.append(b)
         b.grid(row=i//3, column=i%3, sticky=NSEW, padx=3, pady=3)
         b.configure(bg="light gray")
